@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GI Siting Dashboard</title>
+
+  <!-- Libraries (loaded from CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css">
+
+  <!-- Our styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ===== Input Data panel ===== -->
+  <aside class="panel">
+    <h1>Input Data</h1>
+
+    <section class="card">
+      <h2><span class="pin">&#128205;</span> Area or site selection</h2>
+
+      <div class="area-grid">
+        <!-- Small map preview: click it to open the full-size picker -->
+        <div class="thumb" id="thumb" role="button" tabindex="0" aria-label="Open map to select area">
+          <div id="miniMap"></div>
+          <div class="thumb-label" id="thumbLabel">Click to select area</div>
+        </div>
+
+        <div class="area-fields">
+          <div class="field">
+            <label for="county">County</label>
+            <select id="county" disabled></select>
+          </div>
+          <div class="field">
+            <label>Site area (acres)</label>
+            <div class="readout" id="acres">–</div>
+          </div>
+          <div class="field switch-row">
+            <label for="customToggle">Custom boundary</label>
+            <label class="switch">
+              <input type="checkbox" id="customToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="split"></div>
+      <p class="note" id="status">Click the map preview to draw your site.</p>
+    </section>
+
+    <section class="card">
+      <h2>Other measurements</h2>
+      <div class="row"><label>Square miles</label><div class="readout" id="sqmi">–</div></div>
+      <div class="row"><label>Hectares</label><div class="readout" id="ha">–</div></div>
+      <div class="row"><label>Centroid (lat, lon)</label><div class="readout" id="centroid">–</div></div>
+    </section>
+
+    <section class="card disabled">
+      <h2>Coming next</h2>
+      <p class="muted">Runoff source, BMP type, storm event, feasibility settings (Step 2) and prioritization settings (Step 3).</p>
+    </section>
+  </aside>
+
+  <!-- ===== Full-size area picker (opens when the preview is clicked) ===== -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <header class="modal-head">
+        <div>
+          <div class="modal-title" id="pickerTitle">Select area</div>
+          <div class="muted">Use the polygon or rectangle tool on the left of the map, then press Apply.</div>
+        </div>
+        <button class="icon-btn" id="closeBtn" title="Close and discard (Esc)" aria-label="Close">&times;</button>
+      </header>
+
+      <div id="pickerMap"></div>
+
+      <footer class="modal-foot">
+        <div class="live" id="live">No area drawn yet</div>
+        <div class="actions">
+          <button class="btn ghost" id="clearBtn">Clear drawing</button>
+          <button class="btn primary" id="applyBtn" disabled>Apply</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <!-- Data + our code (order matters) -->
+  <script src="data/fl_counties.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
