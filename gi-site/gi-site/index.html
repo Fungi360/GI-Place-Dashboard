@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,6 +13,7 @@
   <!-- Our styles -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
   <!-- ===== Input Data panel ===== -->
@@ -53,15 +55,23 @@
 
     <section class="card">
       <h2>Other measurements</h2>
-      <div class="row"><label>Square miles</label><div class="readout" id="sqmi">–</div></div>
-      <div class="row"><label>Hectares</label><div class="readout" id="ha">–</div></div>
-      <div class="row"><label>Centroid (lat, lon)</label><div class="readout" id="centroid">–</div></div>
+      <div class="row"><label>Square miles</label>
+        <div class="readout" id="sqmi">–</div>
+      </div>
+      <div class="row"><label>Hectares</label>
+        <div class="readout" id="ha">–</div>
+      </div>
+      <div class="row"><label>Centroid (lat, lon)</label>
+        <div class="readout" id="centroid">–</div>
+      </div>
     </section>
 
-    <section class="card disabled">
-      <h2>Coming next</h2>
-      <p class="muted">Runoff source, BMP type, storm event, feasibility settings (Step 2) and prioritization settings (Step 3).</p>
+    <!-- ===== Clean HTML Container for Dynamic JavaScript Injection ===== -->
+    <section class="card">
+      <h2>Green Infrastructure Parameters</h2>
+      <div id="parameters-container"></div>
     </section>
+
   </aside>
 
   <!-- ===== Full-size area picker (opens when the preview is clicked) ===== -->
@@ -99,4 +109,5 @@
   <script src="js/map.js"></script>
   <script src="js/main.js"></script>
 </body>
+
 </html>
