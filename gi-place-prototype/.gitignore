@@ -1,0 +1,55 @@
+# === Python & Virtual Environments ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+eggs/
+
+# === Jupyter Notebooks & Checkpoints ===
+.ipynb_checkpoints/
+**/__pycache__/
+
+# === Environment Variables & Secrets ===
+.env
+.env.local
+secrets.json
+
+# === Operating System Files ===
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# === IDEs & Editors ===
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === Databases & Logs ===
+*.sqlite3
+*.db
+*.log
+*.log.*
+
+# === Large Geospatial Inputs (~51 GB: NAIP, DEM, gSSURGO, etc.) ===
+# Share these outside git (network drive / cloud storage) and document sources in README.
+Inputs/
+*.tif
+*.tiff
+*.gdb/
+*.adf
+*.ovr
+
+# === Local Project Outputs & Caches ===
+Outputs/
+cache/
+controle3mm

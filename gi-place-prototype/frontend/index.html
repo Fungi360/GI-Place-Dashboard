@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GI Siting Dashboard - Step 1</title>
+
+  <!-- Libraries (loaded from CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css">
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- ===== Left Sidebar: Input Settings ===== -->
+  <aside class="panel">
+    <h1>Step 1: Existing Conditions</h1>
+
+    <!-- Card 1: Area or site selection -->
+    <section class="card">
+      <h2><span class="pin">&#128205;</span> Area or site selection</h2>
+
+      <div class="area-grid">
+        <!-- Small map preview: click it to open the full-size picker -->
+        <div class="thumb" id="thumb" role="button" tabindex="0" aria-label="Open map to select area">
+          <div id="miniMap"></div>
+          <div class="thumb-label" id="thumbLabel">Click to select area</div>
+        </div>
+
+        <div class="area-fields">
+          <div class="field">
+            <label for="county">County</label>
+            <select id="county" disabled>
+              <option value="Lee" selected>–</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Site area (acres)</label>
+            <div class="readout" id="acres">–</div>
+          </div>
+          <div class="field switch-row">
+            <label for="customToggle">Custom boundary</label>
+            <label class="switch">
+              <input type="checkbox" id="customToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="split"></div>
+      <p class="note" id="status">Click the map preview to draw your site.</p>
+      <div hidden aria-hidden="true">
+        <span id="sqmi">–</span>
+        <span id="ha">–</span>
+        <span id="centroid">–</span>
+      </div>
+    </section>
+
+    <!-- Card 2: Step 1 Existing Conditions & Thresholds (Hardcoded to match your mockup layout precisely) -->
+    <section class="card" id="step1-card">
+      <h2><span class="step-num">1</span> Existing conditions <span
+          class="muted threshold-title-note">Characterization</span></h2>
+      <p class="muted mt-1 thresholds-intro">Characterization thresholds</p>
+
+      <div id="step1-thresholds">
+        <!-- Row 1: Rip. buffer & Drain. buffer -->
+        <div class="threshold-row-buffer">
+          <div class="field threshold-control">
+            <label for="rip-buffer" class="threshold-label">Rip.
+              buffer</label>
+            <div class="threshold-input-row">
+              <input type="number" id="rip-buffer" class="form-control threshold-input" value="100">
+              <span class="threshold-unit">ft</span>
+            </div>
+          </div>
+          <div class="field threshold-control">
+            <label for="drain-buffer" class="threshold-label">Drain. buffer</label>
+            <div class="threshold-input-row">
+              <input type="number" id="drain-buffer" class="form-control threshold-input" value="100">
+              <span class="threshold-unit">ft</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Tree canopy & Steep slope -->
+        <div class="threshold-row-percent">
+          <div class="field threshold-control">
+            <label for="tree-canopy" class="threshold-label">Tree
+              canopy</label>
+            <div class="threshold-input-row">
+              <input type="number" id="tree-canopy" class="form-control threshold-input" value="50">
+              <span class="threshold-unit">%</span>
+            </div>
+          </div>
+          <div class="field threshold-control">
+            <label for="steep-slope" class="threshold-label">Steep
+              slope</label>
+            <div class="threshold-input-row">
+              <input type="number" id="steep-slope" class="form-control threshold-input" value="25">
+              <span class="threshold-unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Six characterization layers & View list -->
+        <div class="layer-list-section">
+          <div class="layer-list-heading">
+            <span class="layer-list-title">▼ Six characterization layers</span>
+            <a href="#" id="view-layers-link" class="layer-list-link">View
+              list</a>
+          </div>
+          <!-- data-layer must match the keys in the /run-step1 "layers" response -->
+          <div class="layer-button-grid" id="layer-toggles">
+            <button type="button" class="pill-btn layer-button" data-layer="riparian" aria-pressed="false">Riparian areas</button>
+            <button type="button" class="pill-btn layer-button" data-layer="trees" aria-pressed="false">Trees/forests</button>
+            <button type="button" class="pill-btn layer-button" data-layer="groundwater" aria-pressed="false">GW recharge</button>
+            <button type="button" class="pill-btn layer-button" data-layer="steep" aria-pressed="false">Steep slopes</button>
+            <button type="button" class="pill-btn layer-button" data-layer="drainage" aria-pressed="false">Drainage pathways</button>
+            <button type="button" class="pill-btn layer-button" data-layer="residual" aria-pressed="false">Residual pervious</button>
+          </div>
+        </div>
+
+        <button id="run-step1-btn" class="btn primary mt-3 run-analysis-button" type="button" disabled>Run Step 1 Analysis</button>
+        <p id="analysis-status" class="note" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Card 3: Feasibility screening (Locked / Grayed out) -->
+    <section class="card locked-card locked-step">
+      <h2><span class="step-num">2</span> Feasibility screening <span class="locked-step-icon">🔒</span></h2>
+    </section>
+
+    <!-- Card 4: Priority ranking (Locked / Grayed out) -->
+    <section class="card locked-card locked-step">
+      <h2><span class="step-num">3</span> Priority ranking <span class="locked-step-icon">🔒</span></h2>
+    </section>
+
+  </aside>
+
+  <!-- ===== Main Viewport Container ===== -->
+  <main class="main-viewport map-workspace">
+    <header class="viewport-header map-titlebar">
+      <h2 class="map-title">Output map</h2>
+      <div class="viewport-actions">
+        <button class="btn ghost sm">Load map</button>
+        <button class="btn ghost sm">Expand</button>
+      </div>
+    </header>
+    <div class="map-canvas-container">
+      <div id="map" class="map-canvas"></div>
+    </div>
+  </main>
+
+  <!-- ===== Full-size area picker modal overlay (opens when preview is clicked) ===== -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <header class="modal-head">
+        <div>
+          <div class="modal-title" id="pickerTitle">Select area</div>
+          <div class="muted">Use the polygon or rectangle tool on the left of the map, then press Apply.</div>
+        </div>
+        <button class="icon-btn" id="closeBtn" title="Close and discard (Esc)" aria-label="Close">&times;</button>
+      </header>
+
+      <div id="pickerMap"></div>
+
+      <footer class="modal-foot">
+        <div class="live" id="live">No area drawn yet</div>
+        <div class="actions">
+          <button class="btn ghost" id="clearBtn">Clear drawing</button>
+          <button class="btn primary" id="applyBtn" disabled>Apply</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <!-- Data + our code (order matters) -->
+  <script src="data/fl_counties.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

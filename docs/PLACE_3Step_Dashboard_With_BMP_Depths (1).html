@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLACE | Three-Step Characterization, Feasibility and Priority Dashboard</title>
+<style>
+:root{--bg:#f2f6fb;--panel:#fff;--ink:#19334d;--blue:#155e9b;--muted:#627a91;--line:#dce6f0;--soft:#f6f9fc;--green:#23745a;--amber:#986218;--shadow:0 2px 14px rgba(31,63,98,.05)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:12px/1.35 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.map-load:focus-within{outline:2px solid #268adb;outline-offset:2px}
+.topbar{height:52px;padding:0 17px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--line);gap:10px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.logo{width:27px;height:27px;border-radius:8px;background:#165fa0;color:#fff;display:grid;place-items:center;font-weight:900;font-size:12px;letter-spacing:-1px}
+.brand strong{font-size:14px;letter-spacing:-.02em;white-space:nowrap}
+.brand small{font-size:10px;color:var(--muted);white-space:nowrap}
+.topnote{font-size:10px;color:#60788c;white-space:nowrap}
+.workspace{display:grid;grid-template-columns: minmax(312px,355px) minmax(0,1fr);gap:12px;padding:12px;max-width:1600px;margin:auto;height:calc(100vh - 52px);min-height:550px}
+.sidebar{min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:3px;scrollbar-width:thin;scrollbar-color:#b4c9dc transparent}
+.sideheading{font-size:10px;letter-spacing:.075em;font-weight:800;color:#3b617e;margin:1px 1px 8px;display:flex;align-items:center;justify-content:space-between}
+.sideheading span{font-size:10px;color:#6b8399;letter-spacing:0;font-weight:450}
+.step{border:1px solid var(--line);border-radius:11px;background:var(--panel);box-shadow:var(--shadow);margin-bottom:9px;overflow:visible}
+.step>summary{padding:10px 11px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px;user-select:none}
+.step>summary::-webkit-details-marker,.substep>summary::-webkit-details-marker{display:none}
+.step>summary:after{content:'\25BE';font-size:12px;color:#6d8ca5;transition:transform .12s;margin-left:auto}
+.step:not([open])>summary:after{transform:rotate(-90deg)}
+.step-label{font-size:12px;font-weight:780;flex:1}
+.step-sub{font-size:10px;color:var(--muted)}
+.step-num{font-size:11px;background:#e8f2fc;color:#0e5c9e;border-radius:7px;min-width:22px;height:22px;display:grid;place-items:center;font-weight:850}
+.step-content{padding:0 11px 11px;border-top:1px solid #edf2f7}
+.section-lead{font-size:10px;color:var(--muted);margin:8px 0 9px}
+.two-selects{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:7px}
+.field{min-width:0}
+.field>label,.label-inline{font-size:10px;color:#365a77;font-weight:740;display:block;margin:8px 0 4px}
+.field>label[title],.hoverinfo{cursor:help;text-decoration:underline dotted #9db5c8;text-underline-offset:2px}
+select{height:31px;width:100%;min-width:0;outline:none;background:white;border:1px solid #c2d4e4;border-radius:6px;padding:4px 24px 4px 7px;color:#234763;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.threshold-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:9px}
+.threshold-cell{display:flex;align-items:center;gap:4px;padding:6px 6px;border:1px solid #dce7f0;border-radius:7px;background:#fbfdff;min-width:0;min-height:37px}
+.threshold-cell label{font-size:10px;color:#3d617b;font-weight:730;flex:1;min-width:0;white-space:nowrap;cursor:help}
+.threshold-cell .op{font-size:12px;color:#175d94;font-weight:800;min-width:11px;text-align:center}
+.threshold-cell input{width:43px;min-width:0;height:25px;border:1px solid #b7cde0;border-radius:5px;background:white;padding:3px 4px;text-align:right;font-weight:740;font-size:11px;color:#143e61;font-variant-numeric:tabular-nums;appearance:textfield;-moz-appearance:textfield}
+.threshold-cell input::-webkit-outer-spin-button,.threshold-cell input::-webkit-inner-spin-button,.break-field input::-webkit-inner-spin-button,.pair input::-webkit-inner-spin-button{appearance:none;margin:0}
+.threshold-cell .unit{font-size:9px;color:#71869b;min-width:10px}
+.tiny-note{font-size:10px;color:#668095;margin:7px 1px 0;line-height:1.45}
+.tiny-note .dot{font-weight:750;color:var(--blue)}
+.no-criteria{grid-column:1/-1;padding:10px;background:var(--soft);border:1px dashed #c6d9e7;border-radius:7px;color:#53718a;font-size:11px}
+.actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px solid #edf1f5;align-items:center}
+.action{border:1px solid #cfdce8;border-radius:6px;background:white;color:#315f80;padding:6px 9px;font-size:10px;font-weight:720;white-space:nowrap;min-height:27px}
+.action:hover{background:#f2f7fc}
+.action.primary{background:#155e9b;border-color:#155e9b;color:white}
+.action.primary:hover{background:#0e4f85}
+.action.reset{margin-left:auto}
+.status{font-size:10px;color:var(--green);line-height:1.3;margin:6px 1px 0;min-height:0}
+.status.error{color:#a34b2b}
+.priority-picker{margin-top:3px}
+.breaks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:8px 0}
+.break-field{border:1px solid #c3d6e5;background:#fff;border-radius:7px;display:flex;align-items:center;gap:5px;min-width:0;height:32px;overflow:hidden}
+.break-field label{font-size:10px;background:#edf4f9;height:100%;padding:0 6px;display:flex;align-items:center;color:#446681;font-weight:750;cursor:help;border-right:1px solid #dce7ef;flex-shrink:0}
+.break-field input{font-size:12px;font-weight:750;color:#184b70;border:0;outline:none;background:transparent;text-align:right;width:100%;min-width:0;padding:3px 2px;appearance:textfield;-moz-appearance:textfield}
+.break-field span{font-size:9px;color:#728ba0;padding-right:7px;white-space:nowrap}
+.class-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.class-chip{border:1px solid #dce6ee;border-top:3px solid #a9bbcd;background:#fff;border-radius:6px;padding:5px 5px 6px;min-width:0}
+.class-chip.medium{border-top-color:#87b3d8}.class-chip.high{border-top-color:#429b7a}
+.class-chip small{display:block;color:#617b90;font-size:9px;font-weight:700}
+.class-chip strong{display:block;margin-top:2px;font-size:10px;line-height:1.3;color:#285572;overflow-wrap:anywhere}
+.ahp-title{display:flex;align-items:center;justify-content:space-between;margin:10px 0 5px;gap:7px;font-weight:770;font-size:11px}
+.cr{font-size:10px;font-weight:700;color:var(--green);background:#eaf6ef;border-radius:99px;padding:3px 6px;white-space:nowrap}
+.cr.warn{color:#985d08;background:#fff1db}
+.weights{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.weight-chip{border:1px solid #e0e9f0;border-radius:6px;background:#fafdff;min-width:0;padding:5px 3px;text-align:center;cursor:help}
+.weight-chip span{display:block;font-size:9px;color:#557188;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.weight-chip b{font-size:10px;color:#20577e;font-variant-numeric:tabular-nums}
+.weightbar{height:2px;border-radius:5px;background:#e1ebf4;margin-top:4px;overflow:hidden}.weightbar div{height:100%;background:#337ab0}
+.substep{margin-top:8px;border-top:1px solid #e8eff4;padding-top:6px}
+.substep>summary{font-size:10px;color:#2f6388;font-weight:750;cursor:pointer;list-style:none;padding:4px 0;display:flex;align-items:center;gap:5px}
+.substep>summary:before{content:'\25B8';color:#4c7ca0;font-size:11px}
+.substep[open]>summary:before{content:'\25BE'}
+.pair-guide{font-size:10px;color:#6b8196;margin:4px 0 7px;line-height:1.4}
+.pair-list{display:grid;grid-template-columns:1fr;gap:4px}
+.pair{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:4px 7px;border:1px solid #dbe6ee;border-radius:6px;background:#fbfdff;min-height:28px}
+.pair label{font-size:10px;color:#4b6a83;min-width:0;cursor:help}
+.pair input{height:23px;width:55px;flex-shrink:0;border:1px solid #bed1e0;border-radius:5px;background:white;text-align:right;padding:2px 5px;font-size:11px;color:#204c6a;appearance:textfield;-moz-appearance:textfield}
+.cr-detail{font-size:10px;color:#668095;margin-top:7px}
+.cr-detail b{color:var(--green)}.cr-detail.warn b{color:#a66c18}
+.results{min-width:0;min-height:0;display:flex;flex-direction:column;gap:9px}
+.results-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:16px;padding:0 3px}
+.results-head strong{font-size:12px}.results-head span{font-size:10px;color:var(--muted)}
+.map-grid{flex:1;min-height:0;display:grid;grid-template-rows:repeat(2,minmax(230px,1fr));gap:10px}
+.map-card{border:1px solid var(--line);box-shadow:var(--shadow);background:#fff;border-radius:11px;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.map-top{min-height:43px;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #edf1f5;gap:10px}
+.map-name{font-size:12px;font-weight:780;display:flex;align-items:center;gap:7px}
+.map-badge{display:grid;place-items:center;min-width:23px;height:23px;border-radius:6px;color:white;background:#215d98;font-weight:800;font-size:11px}
+.map-badge.priority{background:#6955aa}
+.map-actions{display:flex;align-items:center;gap:5px}
+.map-load{display:inline-block;border:1px solid #cddfec;border-radius:6px;padding:5px 8px;color:#285c7c;font-size:10px;font-weight:720;cursor:pointer;position:relative;overflow:hidden;white-space:nowrap}
+.map-load:hover{background:#f4f8fc}
+.map-load input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.map-clear{border:1px solid #e2e9f0;border-radius:6px;background:white;color:#677f94;font-size:10px;padding:5px 7px}
+.map-clear:hover{background:#f2f5f9}
+.map-stage{flex:1;position:relative;min-height:0;background:#f7fafc;overflow:hidden}
+.map-stage>img,.map-stage>iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:white}
+.map-stage>iframe{object-fit:fill}
+.map-placeholder{width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#688399;padding:16px;background-image:linear-gradient(#eaf0f6 1px,transparent 1px),linear-gradient(90deg,#eaf0f6 1px,transparent 1px);background-size:28px 28px}
+.map-graphic{width:47px;height:47px;border-radius:15px;border:1px solid #d6e5f2;background:#fff;display:grid;place-items:center;margin-bottom:10px;font-size:20px;color:#7fa0ba}
+.map-placeholder strong{font-size:12px;color:#406783}
+.map-placeholder small{font-size:10px;max-width:280px;margin-top:5px;line-height:1.5}
+.maps-note{font-size:10px;color:#6a8298;text-align:right;padding:0 2px;line-height:1.35}
+.help-text{font-size:9px;color:#8396a8;padding:3px 1px 0}
+.modal{border:0;border-radius:13px;max-width:95vw;max-height:95vh;width:1000px;height:80vh;padding:0;box-shadow:0 8px 50px #001a3577;overflow:hidden}
+.modal::backdrop{background:#0a2039b5}
+.modal-head{height:44px;display:flex;align-items:center;justify-content:space-between;padding:7px 15px;border-bottom:1px solid var(--line)}
+.modal-stage{height:calc(100% - 44px);width:100%;position:relative}.modal-stage>img,.modal-stage>iframe{width:100%;height:100%;object-fit:contain;border:0}
+@media(min-width:1400px){.workspace{grid-template-columns:minmax(350px,385px) minmax(0,1fr)}}
+@media(max-width:850px){html,body{height:auto}.workspace{height:auto;min-height:0;grid-template-columns:1fr;gap:12px}.sidebar{overflow:visible;padding-right:0}.map-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr;min-height:360px}.map-card{min-height:325px}.results{min-height:395px}.topnote{display:none}}
+@media(max-width:540px){.topbar{padding:0 12px}.brand small{display:none}.workspace{padding:8px;gap:8px}.map-grid{grid-template-columns:1fr;grid-template-rows:repeat(2,300px)}.results{min-height:0}.step-content{padding:0 9px 10px}.two-selects{gap:6px}.class-chip{padding:4px}.map-card{min-height:0}}
+@media(max-width:340px){.threshold-grid{grid-template-columns:1fr}.two-selects{grid-template-columns:1fr}}
+/* Sidebar-only embeds reuse the same controls, without map placeholders. */
+body.sidebar-only .workspace{display:block;max-width:415px;height:auto;min-height:0;margin:0 auto;padding:8px}
+body.sidebar-only .sidebar{overflow:visible}
+body.sidebar-only .results{display:none}
+body.sidebar-only .topbar{height:42px}
+body.sidebar-only .topnote{display:none}
+@media print{.workspace{height:auto;display:block}.results,.map-actions,.actions,.topbar{display:none}.sidebar{overflow:visible}.step{break-inside:avoid}}
+
+/* Three-step refinements: compact characterization settings and right-side map tabs. */
+.step1-num{background:#eaf7f1;color:#197456}
+.step1-map-badge{background:#18866d}
+.step1-hint{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;color:#54738b;margin-top:9px;font-weight:720}
+.step1-hint .hoverinfo{font-weight:600}
+.step1-field{padding:5px 6px;min-height:37px}
+.step1-field label{overflow:hidden;text-overflow:ellipsis}
+.step1-field input{width:47px}
+.layer-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:7px}
+.layer-list span{display:block;cursor:help;padding:5px;border-radius:5px;background:#f3f8fc;border:1px solid #e5edf5;font-size:9px;color:#52738b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.results-head-tabs{flex-wrap:wrap;row-gap:7px}
+.map-switcher{display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap}
+.map-tab{border:1px solid #d4e1ec;background:#fff;color:#46708e;border-radius:7px;padding:5px 9px;font-size:10px;font-weight:750;white-space:nowrap}
+.map-tab.active{background:#e8f2fc;color:#135c9c;border-color:#87b8e7}
+.map-tab.map-compare{margin-left:4px;color:#475d7c}
+.map-tab:hover{background:#f1f7fe}
+.map-grid{grid-template-columns:1fr;grid-template-rows:minmax(280px,1fr);overflow:hidden;min-height:0}
+.map-grid[data-view="1"] .map-card:not([data-step="1"]),
+.map-grid[data-view="2"] .map-card:not([data-step="2"]),
+.map-grid[data-view="3"] .map-card:not([data-step="3"]){display:none}
+.map-grid[data-view="compare"]{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(235px,1fr));overflow-y:auto;scrollbar-width:thin}
+.map-card{min-height:0}
+.map-placeholder code{background:#fff;padding:2px 4px;border-radius:4px;font-size:10px;word-break:break-all}
+@media (max-width:850px){
+  .map-grid{grid-template-columns:1fr;grid-template-rows:minmax(330px,1fr);min-height:390px}
+  .map-grid[data-view="compare"]{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(270px,1fr));height:850px}
+  .results{min-height:410px}
+}
+@media (max-width:540px){
+  .map-grid{grid-template-columns:1fr;grid-template-rows:minmax(280px,1fr);min-height:330px}
+  .results-head-tabs{align-items:flex-start}
+  .map-tab{padding:5px 7px}
+}
+
+
+/* Storage depths are Step 3 design inputs, not a separate analysis step. */
+.depth-num{background:#fff2e4;color:#9a5c22}
+.bmp-depth-grid .threshold-cell{min-height:39px}
+.bmp-depth-grid .threshold-cell input{width:78px;min-width:57px;max-width:83px}
+.bmp-depth-grid .threshold-cell label{white-space:normal;line-height:1.2}
+.bmp-depth-preview{justify-content:space-between;background:#f5faff}
+.bmp-depth-preview label{font-size:10px;color:#56718b;font-weight:720}
+.bmp-depth-preview strong{font-size:12px;color:#1e5c84;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:340px){.bmp-depth-grid{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body class="">
+<header class="topbar">
+  <div class="brand"><div class="logo">P</div><strong>PLACE | GI-BMP decision support</strong><small>Criteria configuration</small></div>
+  <div class="topnote">Three-step criteria &bull; Maps on the right</div>
+</header>
+<main class="workspace">
+  <aside class="sidebar" aria-label="Input settings sidebar">
+    <div class="sideheading">INPUT SETTINGS <span>Steps 1–3 &bull; export to rerun</span></div>
+    <details class="step" open id="step1Section">
+      <summary><span class="step-num step1-num">1</span><span class="step-label">Existing conditions</span><span class="step-sub">Characterization</span></summary>
+      <div class="step-content">
+        <div class="step1-hint" title="These are the four editable thresholds defined in Step1_Existing_Condition_Characterization.ipynb. Input data sources and land-cover codes are managed in the notebook.">Characterization thresholds <span class="hoverinfo" title="Riparian and drainage buffers are in feet; tree canopy and steep slope use percent. The Step 1 notebook runs the GIS analysis.">&#9432;</span></div>
+        <div id="step1Fields" class="threshold-grid" aria-label="Editable Step 1 characterization thresholds"></div>
+        <details class="substep" id="step1Layers"><summary>Six characterization layers <span class="step-sub">View list</span></summary>
+          <div class="layer-list" aria-label="Step 1 output GeoTIFF layers">
+            <span title="riparian_areas.tif — NAIP open water and wetlands, plus optional FEMA Zone A, buffered">Riparian areas</span>
+            <span title="trees_forests.tif — areas above the tree canopy threshold">Trees/forests</span>
+            <span title="groundwater_recharge_zones.tif — soil hydrologic groups A and B, excluding impervious areas">GW recharge</span>
+            <span title="natural_drainage_pathways_buffer.tif — buffered natural drainage lines">Drainage pathways</span>
+            <span title="steep_slopes.tif — areas above the steep slope threshold">Steep slopes</span>
+            <span title="pervious_areas.tif — residual non-impervious areas after excluding the other five layers">Residual pervious</span>
+          </div>
+        </details>
+        <div class="actions">
+          <button type="button" class="action primary" id="step1PythonBtn" title="Download a Python parameters file with the four Step 1 thresholds">Export .py</button>
+          <button type="button" class="action" id="step1JsonBtn" title="Download Step 1 threshold settings as JSON">JSON</button>
+          <button type="button" class="action reset" id="step1ResetBtn" title="Restore Step 1 thresholds to their notebook defaults">Reset</button>
+        </div>
+        <div id="step1Status" class="status" aria-live="polite"></div>
+      </div>
+    </details>
+    <details class="step" open id="step2Section">
+      <summary><span class="step-num">2</span><span class="step-label">Feasibility screening</span><span class="step-sub">Rule-based</span></summary>
+      <div class="step-content">
+        <div class="two-selects">
+          <div class="field"><label for="sourceSelect" title="Runoff source category used in Step 2 binary feasibility screening">Runoff source</label><select id="sourceSelect" aria-label="Runoff source"></select></div>
+          <div class="field"><label for="bmpSelect" title="Green infrastructure best management practice. Choices depend on the runoff source.">GI-BMP</label><select id="bmpSelect" aria-label="GI-BMP"></select></div>
+        </div>
+        <div id="thresholds" class="threshold-grid" aria-label="Editable BMP rule-based feasibility thresholds"></div>
+        <div class="tiny-note" id="siteNote"></div>
+        <div class="actions">
+          <button type="button" class="action primary" id="feasPythonBtn" title="Export Python threshold variables for all Step 2 BMPs">Export .py</button>
+          <button type="button" class="action" id="feasCsvBtn" title="Export the selected BMP criteria as CSV">BMP CSV</button>
+          <button type="button" class="action reset" id="feasResetBtn" title="Restore Step 2 threshold defaults">Reset</button>
+        </div>
+        <div id="feasStatus" class="status" aria-live="polite"></div>
+      </div>
+    </details>
+    <details class="step" open id="step3Section">
+      <summary><span class="step-num">3</span><span class="step-label">Priority ranking</span><span class="step-sub">AHP</span></summary>
+      <div class="step-content">
+        <div class="field priority-picker"><label for="criterionSelect" title="Select one of the five shared Step 3 suitability criteria. The BMP is selected automatically by the notebook, not here.">Priority criterion</label>
+          <select id="criterionSelect" aria-label="Priority criterion"></select>
+        </div>
+        <div class="breaks">
+          <div class="break-field"><label for="cut1" id="cut1Label" title="First boundary between suitability classes">Break 1</label><input id="cut1" type="number" min="0" step="any" inputmode="decimal" aria-label="First suitability boundary"><span id="unit1">%</span></div>
+          <div class="break-field"><label for="cut2" id="cut2Label" title="Second boundary between suitability classes">Break 2</label><input id="cut2" type="number" min="0" step="any" inputmode="decimal" aria-label="Second suitability boundary"><span id="unit2">%</span></div>
+        </div>
+        <div class="class-grid" aria-label="Live priority classification ranges">
+          <div class="class-chip"><small>Low</small><strong id="lowRange"></strong></div>
+          <div class="class-chip medium"><small>Moderate</small><strong id="midRange"></strong></div>
+          <div class="class-chip high"><small>High</small><strong id="highRange"></strong></div>
+        </div>
+        <div class="ahp-title"><span title="AHP percentages are calculated from the 10 pairwise comparisons, not entered separately.">Calculated AHP weights &#9432;</span><span class="cr" id="crBadge">CR 0.006</span></div>
+        <div class="weights" id="weightGrid" aria-label="Calculated shared AHP weights"></div>
+        <details class="substep" id="pairDetails">
+          <summary>Adjust AHP comparisons <span class="step-sub">10 pairs</span></summary>
+          <div class="pair-guide">First / second criterion importance (1 = equal; 3 = three times). Reciprocals are automatic; allowed range 1/9 to 9.</div>
+          <div class="pair-list" id="pairGrid"></div>
+          <div class="cr-detail" id="crDetail"></div>
+        </details>
+        <div class="actions">
+          <button type="button" class="action primary" id="priorityJsonBtn" title="Export JSON settings for configurable Step 3 notebook">JSON</button>
+          <button type="button" class="action" id="priorityPyBtn" title="Export Python thresholds and AHP matrix">Python</button>
+          <button type="button" class="action" id="priorityCsvBtn" title="Export all Step 3 criteria and shared AHP weights">CSV</button>
+          <button type="button" class="action reset" id="priorityResetBtn" title="Restore Step 3 class limits and pairwise comparisons">Reset</button>
+        </div>
+        <div id="priorityStatus" class="status" aria-live="polite"></div>
+        <div class="help-text" title="Step 3 uses five shared criteria. Green roofs exclude Ksat and renormalize their AHP weights. Table 3 labels drainage meters; the uploaded notebook implements feet.">Shared criteria across BMPs &bull; green roofs omit Ksat &#9432;</div>
+      </div>
+    </details>
+    <details class="step" open id="bmpDepthSection">
+      <summary><span class="step-num depth-num">D</span><span class="step-label">BMP storage depths</span><span class="step-sub">Storage design</span></summary>
+      <div class="step-content">
+        <div class="field"><label for="depthBmpSelect" title="Select the BMP type to edit its storage depth. The same depth is used for that BMP across runoff sources.">GI-BMP</label>
+          <select id="depthBmpSelect" aria-label="Select BMP storage depth or rainwater harvesting capacity"></select>
+        </div>
+        <div id="depthFields" class="threshold-grid bmp-depth-grid" aria-label="Editable BMP storage depth and calculated conversion"></div>
+        <div id="depthNote" class="tiny-note"></div>
+        <div class="actions">
+          <button type="button" class="action primary" id="depthPythonBtn" title="Export all BMP storage depths and cistern capacity using the Step 3 notebook variable names">Export .py</button>
+          <button type="button" class="action" id="depthJsonBtn" title="Export BMP storage design inputs as JSON">JSON</button>
+          <button type="button" class="action reset" id="depthResetBtn" title="Restore the Step 3 notebook default BMP depths and cistern capacity">Reset</button>
+        </div>
+        <div class="status" id="depthStatus" aria-live="polite"></div>
+      </div>
+    </details>
+    <div class="tiny-note" style="padding:0 3px 8px" title="Groundwater NoData passes Step 2 GW screening. Riparian setback only applies if a riparian raster exists. HTML edits do not automatically run the Jupyter analyses.">Export settings for your notebooks. Changes do not automatically recalculate any of the maps.</div>
+  </aside>
+  <section class="results" aria-label="Characterization, feasibility, and priority maps">
+    <div class="results-head results-head-tabs">
+      <strong>OUTPUT MAPS</strong>
+      <div class="map-switcher" role="group" aria-label="Select output map">
+        <button type="button" class="map-tab active" data-map-tab="1" aria-pressed="true" title="Existing-condition map from Step 1">Step 1</button>
+        <button type="button" class="map-tab" data-map-tab="2" aria-pressed="false" title="Binary feasibility map from Step 2">Step 2</button>
+        <button type="button" class="map-tab" data-map-tab="3" aria-pressed="false" title="Priority map from Step 3">Step 3</button>
+        <button type="button" class="map-tab map-compare" id="compareMaps" aria-pressed="false" title="Compare all three output maps vertically">Compare</button>
+      </div>
+    </div>
+    <div class="map-grid" id="mapGrid" data-view="1">
+      <article class="map-card" data-step="1" aria-label="Step 1 existing conditions map">
+        <div class="map-top"><div class="map-name"><span class="map-badge step1-map-badge">1</span>Existing condition characterization</div>
+          <div class="map-actions"><label class="map-load" for="step1File">Load map <input id="step1File" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.html,.htm,image/*,text/html" aria-label="Choose Step 1 characterization map image or Folium HTML"></label><button class="map-clear" type="button" id="step1Expand" disabled title="Expand Step 1 map">Expand</button></div>
+        </div>
+        <div class="map-stage" id="step1Map"><div class="map-placeholder"><div class="map-graphic">&#9671;</div><strong>Step 1 existing-condition map</strong><small>Load <code>step1_existing_condition_overlay.png</code> from your Step 1 notebook, or a self-contained Folium HTML map.</small></div></div>
+      </article>
+      <article class="map-card" data-step="2" aria-label="Step 2 binary feasibility map">
+        <div class="map-top"><div class="map-name"><span class="map-badge">2</span>Binary feasibility screening</div>
+          <div class="map-actions"><label class="map-load" for="feasFile">Load map <input id="feasFile" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.html,.htm,image/*,text/html" aria-label="Choose feasibility PNG or Folium HTML"></label><button class="map-clear" type="button" id="feasExpand" disabled title="Expand feasibility map">Expand</button></div>
+        </div>
+        <div class="map-stage" id="feasMap"><div class="map-placeholder"><div class="map-graphic">&#9638;</div><strong>Step 2 binary feasibility map</strong><small>Load an existing binary feasibility map image or interactive HTML output.</small></div></div>
+      </article>
+      <article class="map-card" data-step="3" aria-label="Step 3 priority map">
+        <div class="map-top"><div class="map-name"><span class="map-badge priority">3</span>Multicriteria prioritization</div>
+          <div class="map-actions"><label class="map-load" for="priorityFile">Load map <input id="priorityFile" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.html,.htm,image/*,text/html" aria-label="Choose priority PNG or Folium HTML"></label><button class="map-clear" type="button" id="priorityExpand" disabled title="Expand priority map">Expand</button></div>
+        </div>
+        <div class="map-stage" id="priorityMap"><div class="map-placeholder"><div class="map-graphic">&#9638;</div><strong>Step 3 multicriteria priority map</strong><small>Load an existing prioritized BMP map image or interactive HTML output.</small></div></div>
+      </article>
+    </div>
+    <div class="maps-note">Outputs display existing images or self-contained Folium maps. To apply changed thresholds, rerun the corresponding Python notebook.</div>
+  </section>
+</main>
+<dialog id="mapModal" class="modal"><div class="modal-head"><strong id="modalTitle">Map</strong><button class="action" type="button" id="modalClose">Close</button></div><div id="modalStage" class="modal-stage"></div></dialog>
+<script>
+'use strict';
+const STEP2_DEFAULTS={"ROOF_DIST_MIN_FT":10.0,"ROOF_DIST_MAX_FT":50.0,"ROOF_MAX_SLOPE_PCT":5.0,"ROOF_MIN_GW_DEPTH_FT":2.0,"PARK_DIST_MIN_FT":1.0,"PARK_DIST_MAX_FT":50.0,"PARK_MAX_SLOPE_PCT":5.0,"PARK_MIN_GW_BIO_FT":2.0,"PARK_MIN_GW_TRENCH_FT":4.0,"SITE_DIST_MIN_FT":50.0,"SITE_MAX_SLOPE_5_PCT":5.0,"SITE_MAX_SLOPE_15_PCT":15.0,"SITE_MIN_GW_2_FT":2.0,"SITE_MIN_GW_4_FT":4.0,"RIPARIAN_MIN_DIST_FT":1.0};
+const STEP2_RULES=[{"id":"01","source":"Roof","bmp":"Bioswale","function":"roof_bioswale_or_bioretention","location":"Pervious area adjacent to a proposed or existing building","distance":{"lo":{"key":"ROOF_DIST_MIN_FT","op":">"},"hi":{"key":"ROOF_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":{"key":"ROOF_MAX_SLOPE_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"ROOF_MIN_GW_DEPTH_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"02","source":"Roof","bmp":"Green roof","function":"at_source_buildings","location":"On the proposed or existing building footprint","distance":{"lo":null,"hi":null,"mode":"atsource"},"slope":{"lo":null,"hi":null,"mode":"na"},"groundwater":{"lo":null,"hi":null,"mode":"na"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"03","source":"Roof","bmp":"Bioretention (Rain Garden)","function":"roof_bioswale_or_bioretention","location":"Pervious area adjacent to a proposed or existing building","distance":{"lo":{"key":"ROOF_DIST_MIN_FT","op":">"},"hi":{"key":"ROOF_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":{"key":"ROOF_MAX_SLOPE_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"ROOF_MIN_GW_DEPTH_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"04","source":"Roof","bmp":"Rainwater harvesting","function":"at_source_buildings","location":"On the proposed or existing building footprint","distance":{"lo":null,"hi":null,"mode":"atsource"},"slope":{"lo":null,"hi":null,"mode":"na"},"groundwater":{"lo":null,"hi":null,"mode":"na"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"05","source":"Roof","bmp":"Trees","function":"roof_trees","location":"Pervious area adjacent to a proposed or existing building","distance":{"lo":{"key":"ROOF_DIST_MIN_FT","op":">"},"hi":{"key":"ROOF_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":null,"mode":"all"},"groundwater":{"lo":null,"hi":null,"mode":"na"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"06","source":"Parking/road","bmp":"Infiltration trench","function":"parking_infiltration_trench","location":"Pervious area adjacent to a proposed or existing parking lot or road","distance":{"lo":{"key":"PARK_DIST_MIN_FT","op":">"},"hi":{"key":"PARK_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":{"key":"PARK_MAX_SLOPE_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"PARK_MIN_GW_TRENCH_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"07","source":"Parking/road","bmp":"Bioswale","function":"parking_bioswale_or_bioretention","location":"Pervious area adjacent to a proposed or existing parking lot or road","distance":{"lo":{"key":"PARK_DIST_MIN_FT","op":">"},"hi":{"key":"PARK_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":{"key":"PARK_MAX_SLOPE_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"PARK_MIN_GW_BIO_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"08","source":"Parking/road","bmp":"Pervious pavement","function":"at_source_parking","location":"On the proposed or existing parking lot or road footprint","distance":{"lo":null,"hi":null,"mode":"atsource"},"slope":{"lo":null,"hi":null,"mode":"na"},"groundwater":{"lo":null,"hi":null,"mode":"na"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"09","source":"Parking/road","bmp":"Bioretention (Rain Garden)","function":"parking_bioswale_or_bioretention","location":"Pervious area adjacent to a proposed or existing parking lot or road","distance":{"lo":{"key":"PARK_DIST_MIN_FT","op":">"},"hi":{"key":"PARK_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":{"key":"PARK_MAX_SLOPE_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"PARK_MIN_GW_BIO_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"10","source":"Parking/road","bmp":"Trees","function":"parking_trees","location":"Pervious area adjacent to a proposed or existing parking lot or road","distance":{"lo":null,"hi":{"key":"PARK_DIST_MAX_FT","op":"<"},"mode":"range"},"slope":{"lo":null,"hi":{"key":"PARK_MAX_SLOPE_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":null,"hi":null,"mode":"na"},"riparian":{"lo":null,"hi":null,"mode":"na"}},{"id":"11","source":"Pervious surfaces on site","bmp":"Bioswale","function":"site_bioswale","location":"Pervious area on site, away from combined impervious sources","distance":{"lo":{"key":"SITE_DIST_MIN_FT","op":">"},"hi":null,"mode":"range"},"slope":{"lo":null,"hi":{"key":"SITE_MAX_SLOPE_5_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"SITE_MIN_GW_2_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":{"key":"RIPARIAN_MIN_DIST_FT","op":">="},"hi":null,"mode":"conditional"}},{"id":"12","source":"Pervious surfaces on site","bmp":"Constructed wetland","function":"site_constructed_wetland","location":"Pervious area on site, away from combined impervious sources","distance":{"lo":{"key":"SITE_DIST_MIN_FT","op":">"},"hi":null,"mode":"range"},"slope":{"lo":null,"hi":{"key":"SITE_MAX_SLOPE_15_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"SITE_MIN_GW_4_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":{"key":"RIPARIAN_MIN_DIST_FT","op":">="},"hi":null,"mode":"conditional"}},{"id":"13","source":"Pervious surfaces on site","bmp":"Dry pond","function":"site_dry_pond","location":"Pervious area on site, away from combined impervious sources","distance":{"lo":{"key":"SITE_DIST_MIN_FT","op":">"},"hi":null,"mode":"range"},"slope":{"lo":null,"hi":{"key":"SITE_MAX_SLOPE_15_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"SITE_MIN_GW_4_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":{"key":"RIPARIAN_MIN_DIST_FT","op":">="},"hi":null,"mode":"conditional"}},{"id":"14","source":"Pervious surfaces on site","bmp":"Infiltration basin","function":"site_infiltration_basin","location":"Pervious area on site, away from combined impervious sources","distance":{"lo":{"key":"SITE_DIST_MIN_FT","op":">"},"hi":null,"mode":"range"},"slope":{"lo":null,"hi":{"key":"SITE_MAX_SLOPE_5_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"SITE_MIN_GW_4_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":{"key":"RIPARIAN_MIN_DIST_FT","op":">="},"hi":null,"mode":"conditional"}},{"id":"15","source":"Pervious surfaces on site","bmp":"Trees","function":"site_trees","location":"Pervious area on site, away from combined impervious sources","distance":{"lo":{"key":"SITE_DIST_MIN_FT","op":">"},"hi":null,"mode":"range"},"slope":{"lo":null,"hi":{"key":"SITE_MAX_SLOPE_15_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":null,"hi":null,"mode":"na"},"riparian":{"lo":{"key":"RIPARIAN_MIN_DIST_FT","op":">="},"hi":null,"mode":"conditional"}},{"id":"16","source":"Pervious surfaces on site","bmp":"Wet pond","function":"site_wet_pond","location":"Pervious area on site, away from combined impervious sources","distance":{"lo":{"key":"SITE_DIST_MIN_FT","op":">"},"hi":null,"mode":"range"},"slope":{"lo":null,"hi":{"key":"SITE_MAX_SLOPE_15_PCT","op":"<"},"mode":"range"},"groundwater":{"lo":{"key":"SITE_MIN_GW_4_FT","op":">="},"hi":null,"mode":"range"},"riparian":{"lo":{"key":"RIPARIAN_MIN_DIST_FT","op":">="},"hi":null,"mode":"conditional"}}];
+const SOURCES=['Roof','Parking/road','Pervious surfaces on site'];
+const SHORT_BMP={'Bioswale':'Bioswale','Green roof':'Green roof','Bioretention (Rain Garden)':'Bioretention','Rainwater harvesting':'Rain harvesting','Trees':'Trees','Infiltration trench':'Infiltration trench','Pervious pavement':'Pervious pavement','Constructed wetland':'Wetland','Dry pond':'Dry pond','Infiltration basin':'Infiltration basin','Wet pond':'Wet pond'};
+const SCREENS=[{key:'distance',name:'Distance to runoff source',short:'Dist.',unit:'ft'},{key:'slope',name:'Land-surface slope',short:'Slope',unit:'%'},{key:'groundwater',name:'Depth to groundwater',short:'GW',unit:'ft'},{key:'riparian',name:'Riparian setback',short:'Rip.',unit:'ft'}];
+const CRITERIA=[
+{key:'runoff',name:'Runoff generation potential',short:'Runoff',unit:'%',mode:'normal',help:'Min-max-normalized runoff generation potential.'},
+{key:'infil',name:'Saturated hydraulic conductivity',short:'Ksat',unit:'in/hr',mode:'normal',help:'Saturated hydraulic conductivity (inches/hour). Omitted for green roofs.'},
+{key:'stor',name:'Storage adequacy',short:'Storage',unit:'%',mode:'normal',help:'Runoff storage adequacy (percentage).'},
+{key:'drain',name:'Distance to natural drainage',short:'Drainage',unit:'ft',mode:'drain',help:'Feet in the notebook; the manuscript Table 3 labels meters.'},
+{key:'slope',name:'Slope suitability',short:'Slope',unit:'%',mode:'slope',help:'Lower slopes receive higher suitability. Exactly 5% is Low.'}
+];
+const DEFAULT_LIMITS={runoff:[50,75],infil:[1.42,5.67],stor:[50,75],drain:[75,100],slope:[2,5]};
+const DEFAULT_MATRIX=[[1,1,2,3,5],[1,1,2,3,4],[.5,.5,1,2,3],[1/3,1/3,.5,1,2],[1/5,1/4,1/3,.5,1]];
+const GROUPS=[
+['Roof-source thresholds',['ROOF_DIST_MIN_FT','ROOF_DIST_MAX_FT','ROOF_MAX_SLOPE_PCT','ROOF_MIN_GW_DEPTH_FT']],
+['Parking/road-source thresholds',['PARK_DIST_MIN_FT','PARK_DIST_MAX_FT','PARK_MAX_SLOPE_PCT','PARK_MIN_GW_BIO_FT','PARK_MIN_GW_TRENCH_FT']],
+['Pervious-site thresholds',['SITE_DIST_MIN_FT','SITE_MAX_SLOPE_5_PCT','SITE_MAX_SLOPE_15_PCT','SITE_MIN_GW_2_FT','SITE_MIN_GW_4_FT']],
+['Riparian setback',['RIPARIAN_MIN_DIST_FT']]
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const py=n=>Number.isInteger(n)?n.toFixed(1):String(n);
+const cloner=x=>JSON.parse(JSON.stringify(x));
+const pretty=n=>Number(n).toLocaleString('en-US',{maximumFractionDigits:8});
+let feas=cloner(STEP2_DEFAULTS),source='Roof',bmp='Bioretention (Rain Garden)';
+let limits=cloner(DEFAULT_LIMITS),matrix=cloner(DEFAULT_MATRIX),selected='runoff';
+function setStatus(id,message,error=false){const e=$(id);e.textContent=message;e.classList.toggle('error',error)}
+function rule(){return STEP2_RULES.find(x=>x.source===source&&x.bmp===bmp)}
+function fillSource(){for(const x of SOURCES){const o=document.createElement('option');o.value=x;o.textContent=x;$('sourceSelect').appendChild(o)} $('sourceSelect').value=source}
+function fillBMP(){const items=STEP2_RULES.filter(x=>x.source===source).map(x=>x.bmp);if(!items.includes(bmp))bmp=items[0];
+ $('bmpSelect').replaceChildren(...items.map(name=>{const opt=new Option(SHORT_BMP[name]||name,name);opt.title=name;return opt}));$('bmpSelect').value=bmp;$('bmpSelect').title=bmp;}
+function screenFields(){const r=rule(),out=[];for(const c of SCREENS)for(const side of ['lo','hi']){const t=r[c.key][side];if(!t)continue;const label=c.short+(side==='lo'?' min':' max');let help=`${c.name}: ${side==='lo'?'minimum':'maximum'} allowed limit; ${t.op} ${feas[t.key]} ${c.unit}. Python variable: ${t.key}. `;if(r[c.key].mode==='conditional')help+='Applied only if the riparian raster is available.';
+ out.push({label,unit:c.unit,t,help});}return out;}
+function renderFeas(){const r=rule(),data=screenFields();$('thresholds').innerHTML=data.length?data.map(c=>{
+ const op=c.t.op.replace('<','&lt;').replace('>','&gt;');return `<div class="threshold-cell"><label for="F_${esc(c.t.key)}" title="${esc(c.help)}">${esc(c.label)}</label><span class="op" title="Comparison ${esc(c.t.op)}">${op==='&gt;='?'&ge;':op==='&lt;='?'&le;':op}</span><input id="F_${esc(c.t.key)}" type="number" step="any" min="0" data-key="${esc(c.t.key)}" value="${feas[c.t.key]}" aria-label="${esc(c.help)}" title="${esc(c.help)}"><span class="unit">${c.unit}</span></div>`
+ }).join(''):'<div class="no-criteria">At source. No numerical feasibility thresholds.</div>';
+ const area=r.location;let txt=`<span class="dot">Site:</span> <span title="${esc(area)}">${esc(area)}</span>`;
+ if(r.riparian.mode==='conditional')txt+=' &middot; <span title="Applies only if riparian-distance raster exists">Riparian conditional</span>';
+ if(r.slope.mode==='all')txt+=' &middot; All slopes';$('siteNote').innerHTML=txt;
+ $('thresholds').querySelectorAll('input').forEach(inp=>inp.addEventListener('change',changeFeas));}
+function changeFeas(evt){const inp=evt.target,k=inp.dataset.key,raw=inp.value.trim(),value=Number(raw);
+ if(!raw||!Number.isFinite(value)||value<0){inp.value=feas[k];setStatus('feasStatus','Enter a nonnegative number.',true);return;}
+ const trial={...feas,[k]:value};if(trial.ROOF_DIST_MIN_FT>=trial.ROOF_DIST_MAX_FT||trial.PARK_DIST_MIN_FT>=trial.PARK_DIST_MAX_FT){inp.value=feas[k];setStatus('feasStatus','Distance minimum must be below maximum.',true);return;}
+ feas[k]=value;renderFeas();setStatus('feasStatus','Updated. Export to apply to Step 2.');}
+function feasPython(){const list=['# PLACE Step 2: BMP rule-based thresholds','# Distance and groundwater depth in feet; slope in percent.'];for(const [name,keys] of GROUPS){list.push('','# '+name);for(const k of keys)list.push(k+' = '+py(feas[k]));}return list.join('\n')+'\n';}
+function feasCSV(){const r=rule();const values=[r.source,r.bmp,r.function,r.location],header=['Source','GI-BMP','Feasibility mask','Location'];for(const c of SCREENS){for(const bound of ['lo','hi']){const t=r[c.key][bound];header.push(c.name+' '+bound+' operator',c.name+' '+bound+' value',c.name+' '+bound+' variable');values.push(t?t.op:'',t?feas[t.key]:'',t?t.key:'');}header.push(c.name+' mode');values.push(r[c.key].mode)}return CSV([header,values]);}
+function criterion(){return CRITERIA.find(x=>x.key===selected)}
+function classRanges(c){const [a,b]=limits[c.key],fmt=x=>`${pretty(x)} ${c.unit}`;
+ if(c.mode==='normal')return [`< ${fmt(a)}`,`${fmt(a)} - ${fmt(b)}`,`> ${fmt(b)}`];
+ if(c.mode==='drain')return [`<= ${fmt(a)}`,`> ${fmt(a)} - <= ${fmt(b)}`,`> ${fmt(b)}`];
+ return [`>= ${fmt(b)}`,`>= ${fmt(a)} - < ${fmt(b)}`,`< ${fmt(a)}`];}
+function renderPriority(){const c=criterion(),[a,b]=limits[selected],ranges=classRanges(c);
+ $('criterionSelect').value=selected;$('criterionSelect').title=c.name+' | '+c.help;
+ $('cut1').value=a;$('cut2').value=b;$('unit1').textContent=c.unit;$('unit2').textContent=c.unit;
+ $('cut1Label').title=(c.mode==='slope'?'High / Moderate':'Low / Moderate')+' class boundary for '+c.name;
+ $('cut2Label').title=(c.mode==='slope'?'Moderate / Low':'Moderate / High')+' class boundary for '+c.name;
+ $('lowRange').textContent=ranges[0];$('midRange').textContent=ranges[1];$('highRange').textContent=ranges[2];
+ renderWeights();}
+function eigen(){let n=matrix.length,v=Array(n).fill(1/n);for(let k=0;k<400;k++){let p=v.map((_,i)=>matrix[i].reduce((sum,m,j)=>sum+m*v[j],0)),total=p.reduce((x,y)=>x+y,0),next=p.map(x=>x/total);if(Math.max(...next.map((x,i)=>Math.abs(x-v[i])))<1e-14){v=next;break}v=next}
+ const Av=v.map((_,i)=>matrix[i].reduce((sum,m,j)=>sum+m*v[j],0)),lambda=Av.reduce((sum,x,i)=>sum+x/v[i],0)/n,ci=Math.max(0,(lambda-n)/(n-1));return {weights:v,lambda,ci,cr:ci/1.12};}
+function renderWeights(){const w=eigen();$('weightGrid').innerHTML=CRITERIA.map((c,i)=>{const pct=w.weights[i]*100;return `<div class="weight-chip" title="${esc(c.name)}: ${pct.toFixed(2)}% shared AHP weight"><span>${esc(c.short)}</span><b>${pct.toFixed(1)}%</b><div class="weightbar"><div style="width:${pct.toFixed(4)}%"></div></div></div>`}).join('');
+ $('crBadge').textContent='CR '+w.cr.toFixed(3);$('crBadge').classList.toggle('warn',w.cr>=0.1);$('crBadge').title=(w.cr<.1?'Acceptable':'Review pairwise judgments')+' AHP consistency ratio (threshold 0.10)';
+ $('crDetail').classList.toggle('warn',w.cr>=.1);$('crDetail').innerHTML=`&lambda;max ${w.lambda.toFixed(4)} &middot; CI ${w.ci.toFixed(4)} &middot; <b>CR ${w.cr.toFixed(4)}</b> &middot; ${w.cr<.1?'Acceptable':'Review comparisons'}`;}
+function renderPairs(){let html='';for(let i=0;i<5;i++)for(let j=i+1;j<5;j++){const a=CRITERIA[i],b=CRITERIA[j];html+=`<div class="pair"><label for="pair_${i}_${j}" title="Importance of ${esc(a.name)} relative to ${esc(b.name)}">${esc(a.short)} / ${esc(b.short)}</label><input type="number" id="pair_${i}_${j}" data-i="${i}" data-j="${j}" step="any" min="0.111111111" max="9" value="${matrix[i][j]}" aria-label="${esc(a.name)} divided by ${esc(b.name)}"></div>`} $('pairGrid').innerHTML=html;$('pairGrid').querySelectorAll('input').forEach(el=>el.addEventListener('change',changePair));}
+function changePair(evt){const el=evt.target,value=Number(el.value),i=Number(el.dataset.i),j=Number(el.dataset.j);if(!el.value.trim()||!Number.isFinite(value)||value<1/9-1e-8||value>9){el.value=matrix[i][j];setStatus('priorityStatus','AHP judgments must be between 1/9 and 9.',true);return;}
+ matrix[i][j]=value;matrix[j][i]=1/value;renderPairs();renderWeights();setStatus('priorityStatus','AHP weights updated. Export to apply.');}
+function changeBreak(evt){const idx=evt.target.id==='cut1'?0:1,raw=evt.target.value.trim(),value=Number(raw);if(!raw||!Number.isFinite(value)||value<0){renderPriority();setStatus('priorityStatus','Enter a nonnegative number.',true);return;}
+ const vals=limits[selected].slice();vals[idx]=value;if(vals[0]>=vals[1]||(['runoff','stor'].includes(selected)&&vals[1]>100)){renderPriority();setStatus('priorityStatus','Break 1 must be smaller than Break 2'+(['runoff','stor'].includes(selected)?' and <=100%.':'.'),true);return;}
+ limits[selected]=vals;renderPriority();setStatus('priorityStatus','Updated. Export JSON to apply to Step 3.');}
+function settings(){return {format:'PLACE_Step3_priority_config_v1',criteria_order:CRITERIA.map(x=>x.key),thresholds:cloner(limits),AHP_MATRIX:cloner(matrix),units:{runoff:'%',infil:'in/hr',stor:'%',drain:'ft',slope:'%'},green_roof_excludes:['infil'],note:'Shared Step 3 thresholds and AHP matrix. BMP-specific handling is automatic in the notebook. Drainage units follow notebook: ft.'};}
+function step3Python(){let lines=['# PLACE Step 3: shared priority class thresholds and AHP matrix','STEP3_THRESHOLDS = {'];for(const c of CRITERIA)lines.push(`    '${c.key}': [${py(limits[c.key][0])}, ${py(limits[c.key][1])}],  # ${c.name} (${c.unit})`);lines.push('}','', 'import numpy as np','CRITERIA_NAMES = ["runoff", "infil", "stor", "drain", "slope"]','AHP_MATRIX = np.array([');for(const row of matrix)lines.push('    ['+row.map(x=>Number(x).toPrecision(11)).join(', ')+'],');lines.push('], dtype=float)','', '# Eigenvector weights are calculated from the AHP matrix.');return lines.join('\n')+'\n';}
+function step3CSV(){const w=eigen(),rows=[['Criterion','Notebook key','Unit','Break 1','Break 2','Low suitability','Moderate suitability','High suitability','Low score','Moderate score','High score','AHP shared weight']];CRITERIA.forEach((c,i)=>{const [low,mid,high]=classRanges(c);rows.push([c.name,c.key,c.unit,...limits[c.key],low,mid,high,.5,.75,1,w.weights[i]])});return CSV(rows);}
+function CSV(rows){return '\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\r\n')+'\r\n';}
+function download(name,text,type){const file=new Blob([text],{type}),url=URL.createObjectURL(file),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+function exportType(name,content,type,status){download(name,content,type);setStatus(status,'Exported '+name);}
+function wire(){fillSource();fillBMP();renderFeas();for(const c of CRITERIA){const opt=new Option(c.name,c.key);opt.title=c.help;$('criterionSelect').append(opt)}renderPriority();renderPairs();
+ $('sourceSelect').addEventListener('change',e=>{source=e.target.value;fillBMP();renderFeas();setStatus('feasStatus','')});
+ $('bmpSelect').addEventListener('change',e=>{bmp=e.target.value;renderFeas();setStatus('feasStatus','')});
+ $('criterionSelect').addEventListener('change',e=>{selected=e.target.value;renderPriority();setStatus('priorityStatus','')});
+ $('cut1').addEventListener('change',changeBreak);$('cut2').addEventListener('change',changeBreak);
+ $('feasPythonBtn').addEventListener('click',()=>exportType('GI_BMP_rule_based_thresholds.py',feasPython(),'text/x-python;charset=utf-8','feasStatus'));
+ $('feasCsvBtn').addEventListener('click',()=>exportType('GI_BMP_selected_BMP_criteria.csv',feasCSV(),'text/csv;charset=utf-8','feasStatus'));
+ $('feasResetBtn').addEventListener('click',()=>{feas=cloner(STEP2_DEFAULTS);renderFeas();setStatus('feasStatus','Feasibility defaults restored.')});
+ $('priorityJsonBtn').addEventListener('click',()=>exportType('PLACE_Step3_priority_config.json',JSON.stringify(settings(),null,2)+'\n','application/json;charset=utf-8','priorityStatus'));
+ $('priorityPyBtn').addEventListener('click',()=>exportType('PLACE_Step3_priority_settings.py',step3Python(),'text/x-python;charset=utf-8','priorityStatus'));
+ $('priorityCsvBtn').addEventListener('click',()=>exportType('PLACE_Step3_priority_criteria.csv',step3CSV(),'text/csv;charset=utf-8','priorityStatus'));
+ $('priorityResetBtn').addEventListener('click',()=>{limits=cloner(DEFAULT_LIMITS);matrix=cloner(DEFAULT_MATRIX);renderPriority();renderPairs();setStatus('priorityStatus','Priority defaults restored.')});
+ $('modalClose').addEventListener('click',()=>$('mapModal').close());
+ $('mapModal').addEventListener('close',()=>$('modalStage').replaceChildren());
+ connectMap('feasFile','feasMap','feasExpand','Binary feasibility map');connectMap('priorityFile','priorityMap','priorityExpand','Multicriteria priority map');}
+const loadedMaps={};
+function mapNode(content){if(content.kind==='html'){const iframe=document.createElement('iframe');iframe.sandbox='allow-scripts allow-popups allow-forms';iframe.referrerPolicy='no-referrer';iframe.title=content.name+' interactive map';iframe.srcdoc=content.data;return iframe;}const img=document.createElement('img');img.alt=content.name+' map';img.src=content.url;return img;}
+function connectMap(inputId,stageId,expandId,label){$(inputId).addEventListener('change',async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;const key=stageId,prev=loadedMaps[key];if(prev&&prev.url)URL.revokeObjectURL(prev.url);
+ if(/\.(html|htm)$/i.test(file.name)||file.type==='text/html'){loadedMaps[key]={kind:'html',data:await file.text(),name:label};}
+ else if(file.type.startsWith('image/')||/\.(png|jpe?g|webp|gif)$/i.test(file.name)){loadedMaps[key]={kind:'image',url:URL.createObjectURL(file),name:label};}
+ else{alert('Choose a PNG/JPG/WEBP image or Folium HTML file.');return;}
+ $(stageId).replaceChildren(mapNode(loadedMaps[key]));$(expandId).disabled=false;e.target.value='';
+ });$(expandId).addEventListener('click',()=>{if(!loadedMaps[stageId])return;$('modalTitle').textContent=label;$('modalStage').replaceChildren(mapNode(loadedMaps[stageId]));$('mapModal').showModal()});}
+
+// Step 1 thresholds are sourced from Step1_Existing_Condition_Characterization.ipynb.
+// Land-cover class codes and six layer-generation algorithms remain in the notebook.
+const STEP1_DEFAULTS = {
+  RIPARIAN_BUFFER_FT: 100,
+  DRAINAGE_BUFFER_FT: 100,
+  TREE_CANOPY_THRESHOLD_PCT: 50,
+  STEEP_SLOPE_THRESHOLD_PCT: 25
+};
+const STEP1_FIELDS = [
+  {key:'RIPARIAN_BUFFER_FT',short:'Rip. buffer',unit:'ft',name:'Riparian buffer distance',desc:'Buffer around NAIP open water and wetlands, with optional FEMA Zone A; applied using source units converted from feet.'},
+  {key:'DRAINAGE_BUFFER_FT',short:'Drain. buffer',unit:'ft',name:'Natural-drainage corridor buffer',desc:'Buffer on natural drainage lines; distance measured in feet.'},
+  {key:'TREE_CANOPY_THRESHOLD_PCT',short:'Tree canopy',unit:'%',name:'Tree/forest canopy threshold',desc:'Tree/forest pixels require canopy percentage STRICTLY GREATER than this value.'},
+  {key:'STEEP_SLOPE_THRESHOLD_PCT',short:'Steep slope',unit:'%',name:'Steep-slope threshold',desc:'Steep-slope pixels have slope percentage STRICTLY GREATER than this value.'}
+];
+let step1Thresholds=cloner(STEP1_DEFAULTS);
+function renderStep1(){
+  $('step1Fields').innerHTML=STEP1_FIELDS.map(f=>{
+    const help=`${f.name}. ${f.desc} Python variable: ${f.key}.`;
+    return `<div class="threshold-cell step1-field"><label for="C_${esc(f.key)}" title="${esc(help)}">${esc(f.short)}</label><input id="C_${esc(f.key)}" data-key="${esc(f.key)}" type="number" step="any" min="0" value="${step1Thresholds[f.key]}" aria-label="${esc(f.name)}" title="${esc(help)}"><span class="unit">${esc(f.unit)}</span></div>`;
+  }).join('');
+  $('step1Fields').querySelectorAll('input').forEach(input=>input.addEventListener('change',changeStep1));
+}
+function changeStep1(evt){
+  const inp=evt.target,k=inp.dataset.key,raw=inp.value.trim(),v=Number(raw);
+  if(!raw||!Number.isFinite(v)||v<0||(k==='TREE_CANOPY_THRESHOLD_PCT'&&v>100)){
+    renderStep1();setStatus('step1Status','Enter a valid nonnegative number'+(k==='TREE_CANOPY_THRESHOLD_PCT'?' (canopy <= 100%).':'.'),true);return;
+  }
+  step1Thresholds[k]=v;
+  renderStep1();
+  setStatus('step1Status','Parameter updated. Export and apply to Step 1 notebook.');
+}
+function step1Python(){
+  const lines=[
+    '# PLACE Step 1: Existing Condition Characterization',
+    '# These four parameters match the source notebook parameter cell.',
+    '# Apply by replacing their definitions in the notebook, then rerun its cells.',
+    '# Buffers are in feet; thresholds in percent.',
+    ''
+  ];
+  for(const f of STEP1_FIELDS)lines.push(`${f.key} = ${py(step1Thresholds[f.key])}  # ${f.name}`);
+  return lines.join('\n')+'\n';
+}
+function step1JSON(){
+  return JSON.stringify({
+    format:'PLACE_Step1_characterization_parameters_v1',
+    notebook:'Step1_Existing_Condition_Characterization.ipynb',
+    thresholds:cloner(step1Thresholds),
+    units:{RIPARIAN_BUFFER_FT:'ft',DRAINAGE_BUFFER_FT:'ft',TREE_CANOPY_THRESHOLD_PCT:'%',STEEP_SLOPE_THRESHOLD_PCT:'%'},
+    notes:'These files export values only. Step 1 GIS analysis must be rerun to regenerate six layers and the existing-condition overlay.'
+  },null,2)+'\n';
+}
+function setMapView(view){
+  $('mapGrid').dataset.view=view;
+  document.querySelectorAll('[data-map-tab]').forEach(btn=>{
+    const active=btn.dataset.mapTab===view;
+    btn.classList.toggle('active',active);
+    btn.setAttribute('aria-pressed',active?'true':'false');
+  });
+  const compare=$('compareMaps'),on=view==='compare';
+  compare.classList.toggle('active',on);compare.setAttribute('aria-pressed',on?'true':'false');
+  compare.textContent=on?'Single map':'Compare';
+}
+function wireStep1AndMaps(){
+  renderStep1();
+  $('step1PythonBtn').addEventListener('click',()=>exportType('PLACE_Step1_characterization_thresholds.py',step1Python(),'text/x-python;charset=utf-8','step1Status'));
+  $('step1JsonBtn').addEventListener('click',()=>exportType('PLACE_Step1_characterization_config.json',step1JSON(),'application/json;charset=utf-8','step1Status'));
+  $('step1ResetBtn').addEventListener('click',()=>{
+    step1Thresholds=cloner(STEP1_DEFAULTS);renderStep1();setStatus('step1Status','Characterization defaults restored.');
+  });
+  connectMap('step1File','step1Map','step1Expand','Step 1 existing conditions map');
+  document.querySelectorAll('[data-map-tab]').forEach(btn=>btn.addEventListener('click',()=>setMapView(btn.dataset.mapTab)));
+  $('compareMaps').addEventListener('click',()=>setMapView($('mapGrid').dataset.view==='compare'?'1':'compare'));
+  setMapView('1');
+}
+
+wire();
+wireStep1AndMaps();
+
+// BMP storage design parameters copied from the Step 3 prioritization notebook.
+// Depths are defined in centimeters there and converted to feet for raster capacity.
+const BMP_DEPTH_DEFAULTS_CM = {
+  bioswale:30.48, green_roof:6.10, bioretention:53.34,
+  infiltration_trench:36.58, pervious_pavement:36.58,
+  constructed_wetland:60.96, dry_pond:60.96,
+  infiltration_basin:30.48, tree:2.54, wet_pond:60.96
+};
+const DEFAULT_CISTERN_LITERS = 1892.71;
+const BMP_DEPTH_OPTIONS = [
+  {key:'bioswale',name:'Bioswale'},
+  {key:'green_roof',name:'Green roof'},
+  {key:'bioretention',name:'Bioretention (Rain Garden)'},
+  {key:'rainwater_harvesting',name:'Rainwater harvesting',volume:true},
+  {key:'tree',name:'Trees'},
+  {key:'infiltration_trench',name:'Infiltration trench'},
+  {key:'pervious_pavement',name:'Pervious pavement'},
+  {key:'constructed_wetland',name:'Constructed wetland'},
+  {key:'dry_pond',name:'Dry pond'},
+  {key:'infiltration_basin',name:'Infiltration basin'},
+  {key:'wet_pond',name:'Wet pond'}
+];
+// Unique Step 3 storage-depth mapping for all 16 Step 2 BMP feasibility masks.
+const BMP_STORAGE_MASK_KEYS = [
+  ['01_roof_bioswale','bioswale'],
+  ['02_roof_green_roof','green_roof'],
+  ['03_roof_bioretention_rain_garden','bioretention'],
+  ['04_roof_rainwater_harvesting',null],
+  ['05_roof_trees','tree'],
+  ['06_parking_infiltration_trench','infiltration_trench'],
+  ['07_parking_bioswale','bioswale'],
+  ['08_parking_pervious_pavement','pervious_pavement'],
+  ['09_parking_bioretention_rain_garden','bioretention'],
+  ['10_parking_trees','tree'],
+  ['11_site_bioswale','bioswale'],
+  ['12_site_constructed_wetland','constructed_wetland'],
+  ['13_site_dry_pond','dry_pond'],
+  ['14_site_infiltration_basin','infiltration_basin'],
+  ['15_site_trees','tree'],
+  ['16_site_wet_pond','wet_pond']
+];
+let bmpDepthsCM=cloner(BMP_DEPTH_DEFAULTS_CM);
+let cisternLiters=DEFAULT_CISTERN_LITERS;
+let selectedDepthBMP='bioswale';
+function selectedDepthOption(){return BMP_DEPTH_OPTIONS.find(x=>x.key===selectedDepthBMP);}
+function renderBMPDepth(){
+  const option=selectedDepthOption(), isVolume=!!option.volume;
+  const val=isVolume?cisternLiters:bmpDepthsCM[option.key];
+  const converted=isVolume?val*0.0353146667:val/30.48;
+  const label=isVolume?'Cistern vol.':'Depth';
+  const unit=isVolume?'L':'cm';
+  const convUnit=isVolume?'ft\u00b3':'ft';
+  const help=isVolume
+    ?'Liters per rainwater-harvesting cistern (LITERS_PER_CISTERN). The notebook uses cistern capacity, not a BMP depth.'
+    :`${option.name} storage depth in centimeters (DEPTH_CM["${option.key}"]). Converted to feet in the notebook.`;
+  $('depthBmpSelect').value=selectedDepthBMP;
+  $('depthBmpSelect').title=option.name;
+  $('depthFields').innerHTML=`<div class="threshold-cell"><label for="bmpDepthValue" title="${esc(help)}">${esc(label)}</label><input id="bmpDepthValue" type="number" step="any" min="0" value="${val}" aria-label="${esc(help)}" title="${esc(help)}"><span class="unit">${unit}</span></div>`+
+    `<div class="threshold-cell bmp-depth-preview" title="Calculated unit conversion, not a separate editable input"><label>${isVolume?'Capacity':'Depth'} (${convUnit})</label><strong id="bmpDepthConverted">${pretty(Number(converted.toFixed(3)))}</strong></div>`;
+  $('depthNote').innerHTML=isVolume
+    ?'<span class="dot">Storage:</span> The notebook calculates capacity from liters per cistern; this BMP has no numeric depth.'
+    :'<span class="dot">Storage:</span> One depth is shared for this BMP across runoff sources. Capacity per pixel = depth (ft) &times; pixel area (ft&sup2;).';
+  const input=$('bmpDepthValue');
+  input.addEventListener('input',()=>{
+    const v=Number(input.value);
+    if(input.value.trim()!==''&&Number.isFinite(v)&&v>0){
+      const convertedPreview=isVolume?v*0.0353146667:v/30.48;
+      $('bmpDepthConverted').textContent=pretty(Number(convertedPreview.toFixed(3)));
+    }
+  });
+  input.addEventListener('change',changeBMPDepth);
+}
+function changeBMPDepth(evt){
+  const el=evt.target,raw=el.value.trim(),value=Number(raw);
+  if(raw===''||!Number.isFinite(value)||value<=0){
+    renderBMPDepth();setStatus('depthStatus','Enter a positive storage depth or cistern capacity.',true);return;
+  }
+  if(selectedDepthOption().volume){cisternLiters=value;}else{bmpDepthsCM[selectedDepthBMP]=value;}
+  renderBMPDepth();setStatus('depthStatus','Storage value updated. Export to apply in the Step 3 notebook.');
+}
+function bmpDepthPython(){
+  const lines=[
+    '# PLACE Step 3 - editable BMP storage design parameters',
+    '# Replace the existing DEPTH_CM / BMP_STORAGE_DEPTH_FT and cistern definitions',
+    '# in Step3_Multicriteria_Prioritization_FAST.ipynb, then rerun the notebook.',
+    '# Depths are entered in centimeters and converted to feet.',
+    'DEPTH_CM = {'
+  ];
+  for(const key of Object.keys(BMP_DEPTH_DEFAULTS_CM)){
+    lines.push(`    "${key}": ${py(bmpDepthsCM[key])},`);
+  }
+  lines.push('}','CM_TO_FT = 1.0 / 30.48',
+     'DEPTH_FT = {name: value * CM_TO_FT for name, value in DEPTH_CM.items()}',
+     '', 'BMP_STORAGE_DEPTH_FT = {');
+  for(const [mask,key] of BMP_STORAGE_MASK_KEYS){
+    lines.push(`    "${mask}": ${key===null?'None':`DEPTH_FT["${key}"]`},`);
+  }
+  lines.push('}', '', `LITERS_PER_CISTERN = ${py(cisternLiters)}`,
+      'LITER_TO_FT3 = 0.0353146667',
+      'CISTERN_VOL_FT3 = LITERS_PER_CISTERN * LITER_TO_FT3');
+  return lines.join('\n')+'\n';
+}
+function bmpDepthJSON(){
+  return JSON.stringify({
+    format:'PLACE_Step3_bmp_storage_parameters_v1',
+    DEPTH_CM:cloner(bmpDepthsCM),
+    CM_TO_FT:1/30.48,
+    BMP_STORAGE_DEPTH_FT:Object.fromEntries(BMP_STORAGE_MASK_KEYS.map(([mask,key])=>[mask,key===null?null:bmpDepthsCM[key]/30.48])),
+    LITERS_PER_CISTERN:cisternLiters,
+    LITER_TO_FT3:0.0353146667,
+    note:'Rainwater harvesting uses cistern volume rather than depth. These values must be applied to the Step 3 notebook before recomputing maps.'
+  },null,2)+'\n';
+}
+function wireBMPDepth(){
+  for(const option of BMP_DEPTH_OPTIONS){
+    const opt=new Option(option.name,option.key);opt.title=option.name;$('depthBmpSelect').append(opt);
+  }
+  $('depthBmpSelect').addEventListener('change',evt=>{selectedDepthBMP=evt.target.value;renderBMPDepth();setStatus('depthStatus','');});
+  $('depthPythonBtn').addEventListener('click',()=>exportType('PLACE_Step3_BMP_storage_depths.py',bmpDepthPython(),'text/x-python;charset=utf-8','depthStatus'));
+  $('depthJsonBtn').addEventListener('click',()=>exportType('PLACE_Step3_BMP_storage_depths.json',bmpDepthJSON(),'application/json;charset=utf-8','depthStatus'));
+  $('depthResetBtn').addEventListener('click',()=>{
+    bmpDepthsCM=cloner(BMP_DEPTH_DEFAULTS_CM);cisternLiters=DEFAULT_CISTERN_LITERS;
+    renderBMPDepth();setStatus('depthStatus','BMP storage defaults restored.');
+  });
+  renderBMPDepth();
+}
+
+wireBMPDepth();
+</script>
+</body>
+</html>

@@ -12,26 +12,13 @@ function initCountyDropdown(counties) {
 
 /** Show the APPLIED site in the panel. */
 function showResult(r) {
+  if (!r || !r.valid) return;
   $("acres").textContent = "~" + fmt(r.acres, r.acres < 100 ? 1 : 0);
-  $("sqmi").textContent = fmt(r.sqMiles, 2);
-  $("ha").textContent = fmt(r.hectares, 1);
-  $("centroid").textContent = r.centroid[0].toFixed(4) + ", " + r.centroid[1].toFixed(4);
-  $("county").value = r.county || "";
+  $("county").value = "Lee";
   $("customToggle").checked = true;
   $("thumbLabel").textContent = "Click to edit area";
-
-  let html = "";
-  if (r.counties.length > 1) {
-    html = "<table><tr><th>County split</th><th>Acres</th></tr>" +
-      r.counties.map(c => `<tr><td>${c.name}</td><td>${fmt(c.acres)} (${c.pct.toFixed(1)}%)</td></tr>`).join("") +
-      (r.outsideAcres > 1 ? `<tr><td>Outside FL / water edge</td><td>${fmt(r.outsideAcres)}</td></tr>` : "") +
-      "</table>";
-  }
-  $("split").innerHTML = html;
-
-  if (!r.county) $("status").innerHTML = '<span class="warn">This area is outside Florida county data.</span>';
-  else if (r.counties.length > 1) $("status").innerHTML = `<span class="warn">Area spans ${r.counties.length} counties; largest share (${r.county}) selected.</span>`;
-  else $("status").textContent = `Area is entirely in ${r.county} County.`;
+  $("split").innerHTML = "";
+  $("status").textContent = "Area is entirely within Lee County.";
 }
 
 /** Reset the panel to "nothing selected". */
@@ -48,8 +35,11 @@ function clearResult() {
 function showDraft(r) {
   const live = $("live");
   if (!r) { live.textContent = "No area drawn yet"; $("applyBtn").disabled = true; return; }
-  const county = r.county ? `${r.county} County` : "outside Florida";
-  const extra = r.counties.length > 1 ? ` (+${r.counties.length - 1} more)` : "";
-  live.innerHTML = `<strong>~${fmt(r.acres, r.acres < 100 ? 1 : 0)} acres</strong> &middot; ${county}${extra}`;
+  if (!r.valid) {
+    live.textContent = r.error;
+    $("applyBtn").disabled = true;
+    return;
+  }
+  live.innerHTML = `<strong>~${fmt(r.acres, r.acres < 100 ? 1 : 0)} acres</strong> · Lee County`;
   $("applyBtn").disabled = false;
 }
